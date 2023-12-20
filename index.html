@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loteria Resultados</title>
+    <style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fffbf2;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+    }
+
+    header {
+        background-color: #ffac00;
+        padding: 15px;
+        text-align: center;
+        color: #fff;
+        grid-column: span 2;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    select {
+        padding: 10px;
+        font-size: 16px;
+        width: 100%;
+        margin-bottom: 20px;
+        background-color: #fff;
+        color: #333;
+        border: 2px solid #ffac00;
+        border-radius: 4px;
+    }
+
+    .result-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    footer {
+        background-color: #333;
+        padding: 10px;
+        text-align: left;
+        color: #fff;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+
+    h2 {
+        color: #ffac00;
+    }
+
+    p {
+        margin: 8px 0;
+    }
+
+    .sidebar {
+        background-color: #ffac00;
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .sidebar img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .sidebar-content {
+        text-align: center;
+        color: #fff;
+    }
+
+    .lottery-numbers {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .lottery-number {
+        font-size: 24px;
+        color: #fff;
+        background-color: #ffac00;
+        padding: 8px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media only screen and (max-width: 600px) {
+        body {
+            grid-template-columns: 1fr;
+        }
+
+        header {
+            grid-column: span 1;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        main {
+            padding: 10px;
+        }
+
+        select {
+            width: 100%;
+        }
+
+        .result-container {
+            padding: 10px;
+        }
+    }
+</style>
+
+    
+</head>
+
+<body>
+
+    <header id="header">
+        <h1>Loteria Resultados</h1>
+    </header>
+
+    <main>
+        <label for="lotterySelect">Selecione Loteria:</label>
+        <select id="lotterySelect" onchange="getLotteryResults()">
+            <option value="megasena">Mega-sena</option>
+            <option value="quina">Quina</option>
+            <option value="lotofacil">Loto-fácil</option>
+            <option value="lotomania">Loto-mania</option>
+            <option value="timemania">Time-mania</option>
+            <option value="diadasorte">Dia-de-sorte</option>
+        </select>
+
+        <div class="result-container" id="resultContainer">
+           
+        </div>
+    </main>
+
+    <script>
+        let selectedLottery = ''
+        let header = document.getElementById('header')
+
+        function getLotteryResults() {
+        const select = document.getElementById('lotterySelect');
+        selectedLottery = select.options[select.selectedIndex].value;
+
+        // API
+        fetch(`http://loteria.cronogramatds.online/sorteio/${selectedLottery}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => displayResults(data))
+            .catch(error => console.error('Error fetching lottery results:', error));
+    }
+
+    function displayResults(data) {
+        const resultContainer = document.getElementById('resultContainer');
+
+        resultContainer.innerHTML = '';
+
+        
+        const heading = document.createElement('h2');
+        heading.textContent = data.tema;
+
+        if(selectedLottery === 'megasena') {
+            header.style.backgroundColor = 'rgb(73, 186, 73)'
+            heading.style.color = 'rgb(73, 186, 73)'
+        } else if(selectedLottery === 'quina') {
+            header.style.backgroundColor = 'purple'
+            heading.style.color = 'purple'
+        } else if(selectedLottery === 'lotofacil') {
+            header.style.backgroundColor = 'pink'
+            heading.style.color = 'pink'
+        } else if(selectedLottery === 'lotomania') {
+            header.style.backgroundColor = 'orange'
+            heading.style.color = 'orange'
+        } else if(selectedLottery === 'timemania') {
+            header.style.backgroundColor = 'rgb(0, 57, 0)'
+            heading.style.color = 'rgb(0, 57, 0)'
+        } else if(selectedLottery === 'diadasorte') {
+            header.style.backgroundColor = 'rgb(203, 153, 46)'
+            heading.style.color = 'rgb(203, 153, 46)'
+        } 
+
+        resultContainer.appendChild(heading);
+
+        const drawNumber = document.createElement('p');
+        drawNumber.innerHTML = `<strong>Draw Number:</strong> ${data.numero}`;
+        resultContainer.appendChild(drawNumber);
+
+        const drawDate = document.createElement('p');
+        drawDate.innerHTML = `<strong>Draw Date:</strong> ${data.data}`;
+        resultContainer.appendChild(drawDate);
+
+        const numbersHeading = document.createElement('p');
+        numbersHeading.innerHTML = '<strong>Numbers:</strong>';
+        resultContainer.appendChild(numbersHeading);
+
+        
+        const numbersList = document.createElement('ul');
+        data.numerosSorteados.forEach(number => {
+            const listItem = document.createElement('li');
+            listItem.textContent = number;
+            numbersList.appendChild(listItem);
+        });
+        resultContainer.appendChild(numbersList);
+    }
+    </script>
+
+</body>
+
+</html>
